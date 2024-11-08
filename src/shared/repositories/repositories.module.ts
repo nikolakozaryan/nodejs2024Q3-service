@@ -1,24 +1,24 @@
 import { Module } from '@nestjs/common';
-import { AlbumsRepository } from './albums.repository';
-import { ArtistsRepository } from './artists.repository';
-import { FavoritesRepository } from './favorites.repository';
-import { TracksRepository } from './tracks.repository';
-import { UsersRepository } from './users.repository';
+import { AlbumRepository } from './album.repository';
+import { ArtistRepository } from './artist.repository';
+import { FavsRepository } from './favs.repository';
+import { TrackRepository } from './track.repository';
+import { UserRepository } from './user.repository';
 
 @Module({
   providers: [
-    UsersRepository,
-    AlbumsRepository,
-    ArtistsRepository,
-    FavoritesRepository,
-    TracksRepository,
+    UserRepository,
+    AlbumRepository,
+    ArtistRepository,
+    FavsRepository,
+    TrackRepository,
   ],
   exports: [
-    UsersRepository,
-    AlbumsRepository,
-    ArtistsRepository,
-    FavoritesRepository,
-    TracksRepository,
+    UserRepository,
+    AlbumRepository,
+    ArtistRepository,
+    FavsRepository,
+    TrackRepository,
   ],
 })
 export class RepositoriesModule {}

@@ -1,8 +1,8 @@
-import { AlbumsModule } from '@modules/albums/albums.module';
-import { ArtistsModule } from '@modules/artists/artists.module';
-import { FavoritesModule } from '@modules/favorites/favorites.module';
-import { TracksModule } from '@modules/tracks/tracks.module';
-import { UsersModule } from '@modules/users/users.module';
+import { AlbumModule } from '@modules/album/album.module';
+import { ArtistModule } from '@modules/artist/artist.module';
+import { FavsModule } from '@modules/favs/favs.module';
+import { TrackModule } from '@modules/track/track.module';
+import { UsersModule } from '@modules/users/user.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
@@ -10,10 +10,10 @@ import { ConfigModule } from '@nestjs/config';
   imports: [
     ConfigModule.forRoot(),
     UsersModule,
-    ArtistsModule,
-    TracksModule,
-    AlbumsModule,
-    FavoritesModule,
+    ArtistModule,
+    TrackModule,
+    AlbumModule,
+    FavsModule,
   ],
 })
 export class AppModule {}

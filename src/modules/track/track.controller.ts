@@ -7,36 +7,36 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
-import { TracksService } from './tracks.service';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
+import { TrackService } from './track.service';
 
-@Controller('tracks')
-export class TracksController {
-  constructor(private readonly tracksService: TracksService) {}
+@Controller('track')
+export class TrackController {
+  constructor(private readonly trackService: TrackService) {}
 
   @Post()
   create(@Body() createTrackDto: CreateTrackDto) {
-    return this.tracksService.create(createTrackDto);
+    return this.trackService.create(createTrackDto);
   }
 
   @Get()
   findAll() {
-    return this.tracksService.findAll();
+    return this.trackService.findAll();
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.tracksService.findOne(+id);
+    return this.trackService.findOne(+id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateTrackDto: UpdateTrackDto) {
-    return this.tracksService.update(+id, updateTrackDto);
+    return this.trackService.update(+id, updateTrackDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.tracksService.remove(+id);
+    return this.trackService.remove(+id);
   }
 }
