@@ -13,5 +13,12 @@ import { UsersRepository } from './users.repository';
     FavoritesRepository,
     TracksRepository,
   ],
+  exports: [
+    UsersRepository,
+    AlbumsRepository,
+    ArtistsRepository,
+    FavoritesRepository,
+    TracksRepository,
+  ],
 })
 export class RepositoriesModule {}

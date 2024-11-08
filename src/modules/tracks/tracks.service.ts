@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
+import { TracksRepository } from '@shared/repositories/tracks.repository';
 
 @Injectable()
 export class TracksService {
+  constructor(private tracksRepo: TracksRepository) {}
+
   create(createTrackDto: CreateTrackDto) {
     return 'This action adds a new track';
   }
