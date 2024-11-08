@@ -8,7 +8,19 @@
 ## Downloading
 
 ```
-git clone {repository URL}
+git clone https://github.com/nikolakozaryan/nodejs2024Q3-service
+```
+
+## Move to app folder
+
+```
+cd nodejs2024Q4-service
+```
+
+## Change brunch to dev
+
+```
+git checkout dev
 ```
 
 ## Installing NPM modules
@@ -65,8 +77,6 @@ npm run lint
 npm run format
 ```
 
-### Debugging in VSCode
+## API
 
-Press <kbd>F5</kbd> to debug.
-
-For more information, visit: https://code.visualstudio.com/docs/editor/debugging
+API description is available [here](https://github.com/AlreadyBored/nodejs-assignments/blob/main/assignments/rest-service/assignment.md#assignment-rest-service).
