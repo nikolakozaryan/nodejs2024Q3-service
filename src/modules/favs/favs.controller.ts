@@ -8,8 +8,9 @@ import {
   ParseUUIDPipe,
   HttpCode,
 } from '@nestjs/common';
-import { FavItemType, FavsService } from './favs.service';
+import { FavsService } from './favs.service';
 import { FavItemTypePipe } from '@shared/pipes/fav-item-type.pipe';
+import { FavItemType } from '@core/types';
 
 @Controller('favs')
 export class FavsController {

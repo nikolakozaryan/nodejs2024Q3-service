@@ -1,4 +1,4 @@
-import { IFavorite } from '@core/interfaces/favorite.interface';
+import { IFavorite } from '@core/interfaces';
 
 export class Favorite implements IFavorite {
   artists: string[];

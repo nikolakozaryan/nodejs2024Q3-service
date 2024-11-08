@@ -1,4 +1,4 @@
-import { ITrack } from '@core/interfaces/track.interface';
+import { ITrack } from '@core/interfaces';
 import { randomUUID } from 'crypto';
 
 export class Track implements ITrack {

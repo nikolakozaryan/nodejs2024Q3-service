@@ -1,4 +1,4 @@
-import { IAlbum } from '@core/interfaces/album.interface';
+import { IAlbum } from '@core/interfaces';
 import { randomUUID } from 'crypto';
 
 export class Album implements IAlbum {

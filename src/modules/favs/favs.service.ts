@@ -1,10 +1,9 @@
+import { FavItemType } from '@core/types';
 import { Injectable } from '@nestjs/common';
 import { AlbumRepository } from '@shared/repositories/album.repository';
 import { ArtistRepository } from '@shared/repositories/artist.repository';
 import { FavsRepository } from '@shared/repositories/favs.repository';
 import { TrackRepository } from '@shared/repositories/track.repository';
-
-export type FavItemType = 'track' | 'album' | 'artist';
 
 @Injectable()
 export class FavsService {

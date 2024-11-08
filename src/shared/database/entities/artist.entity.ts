@@ -1,4 +1,4 @@
-import { IArtist } from '@core/interfaces/artist.interface';
+import { IArtist } from '@core/interfaces';
 import { randomUUID } from 'crypto';
 
 export class Artist implements IArtist {

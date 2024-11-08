@@ -1,4 +1,4 @@
-import { IUser } from '@core/interfaces/user.interface';
+import { IUser } from '@core/interfaces';
 import { Exclude } from 'class-transformer';
 import { randomUUID } from 'crypto';
 
