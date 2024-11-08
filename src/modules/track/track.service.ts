@@ -2,28 +2,48 @@ import { Injectable } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { TrackRepository } from '@shared/repositories/track.repository';
+import { FavsRepository } from '@shared/repositories/favs.repository';
+import { Track } from '@shared/database/entities';
 
 @Injectable()
 export class TrackService {
-  constructor(private trackRepo: TrackRepository) {}
+  constructor(
+    private trackRepo: TrackRepository,
+    private favsRepo: FavsRepository,
+  ) {}
 
   create(createTrackDto: CreateTrackDto) {
-    return 'This action adds a new track';
+    const { name, duration, albumId, artistId } = createTrackDto;
+
+    const entity = new Track(name, artistId, albumId, duration);
+    return this.trackRepo.create(entity);
   }
 
   findAll() {
-    return `This action returns all tracks`;
+    return this.trackRepo.findAll();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} track`;
+  findOne(id: string) {
+    this.checkIfTrackExists(id);
+
+    return this.trackRepo.findOne(id);
   }
 
-  update(id: number, updateTrackDto: UpdateTrackDto) {
-    return `This action updates a #${id} track`;
+  update(id: string, updateTrackDto: UpdateTrackDto) {
+    this.checkIfTrackExists(id);
+
+    return this.trackRepo.update(id, updateTrackDto);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} track`;
+  remove(id: string) {
+    this.checkIfTrackExists(id);
+
+    this.favsRepo.removeTrack(id);
+
+    this.trackRepo.remove(id);
+  }
+
+  private checkIfTrackExists(id: string) {
+    this.trackRepo.checkIfTrackExists(id);
   }
 }

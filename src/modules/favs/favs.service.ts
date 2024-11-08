@@ -1,29 +1,60 @@
 import { Injectable } from '@nestjs/common';
-import { CreateFavoriteDto } from './dto/create-favorite.dto';
-import { UpdateFavoriteDto } from './dto/update-favorite.dto';
+import { AlbumRepository } from '@shared/repositories/album.repository';
+import { ArtistRepository } from '@shared/repositories/artist.repository';
 import { FavsRepository } from '@shared/repositories/favs.repository';
+import { TrackRepository } from '@shared/repositories/track.repository';
+
+export type FavItemType = 'track' | 'album' | 'artist';
 
 @Injectable()
 export class FavsService {
-  constructor(private favsRepo: FavsRepository) {}
+  constructor(
+    private favsRepo: FavsRepository,
+    private trackRepo: TrackRepository,
+    private albumRepo: AlbumRepository,
+    private artistRepo: ArtistRepository,
+  ) {}
 
-  create(createFavoriteDto: CreateFavoriteDto) {
-    return 'This action adds a new favorite';
+  getFavs() {
+    return {
+      artists: this.artistRepo.findMany(this.favsRepo.getArtistIds()),
+      albums: this.albumRepo.findMany(this.favsRepo.getAlbumIds()),
+      tracks: this.trackRepo.findMany(this.favsRepo.getTrackIds()),
+    };
   }
 
-  findAll() {
-    return `This action returns all favorites`;
+  addItem(id: string, itemType: FavItemType) {
+    switch (itemType) {
+      case 'album':
+        this.albumRepo.checkIfAlbumExists(id, true);
+
+        this.favsRepo.addAlbum(id);
+        break;
+      case 'artist':
+        this.artistRepo.checkIfArtistExists(id, true);
+        this.favsRepo.addArtist(id);
+        break;
+      case 'track':
+        this.trackRepo.checkIfTrackExists(id, true);
+        this.favsRepo.addTrack(id);
+        break;
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} favorite`;
-  }
-
-  update(id: number, updateFavoriteDto: UpdateFavoriteDto) {
-    return `This action updates a #${id} favorite`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} favorite`;
+  removeItem(id: string, itemType: FavItemType) {
+    switch (itemType) {
+      case 'album':
+        this.favsRepo.checkIfAlbumIsFav(id);
+        this.favsRepo.removeAlbum(id);
+        break;
+      case 'artist':
+        this.favsRepo.checkIfArtistIsFav(id);
+        this.favsRepo.removeArtist(id);
+        break;
+      case 'track':
+        this.favsRepo.checkIfTrackIsFav(id);
+        this.favsRepo.removeTrack(id);
+        break;
+    }
   }
 }

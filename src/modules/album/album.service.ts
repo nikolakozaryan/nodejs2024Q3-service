@@ -2,28 +2,53 @@ import { Injectable } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { AlbumRepository } from '@shared/repositories/album.repository';
+import { Album } from '@shared/database/entities';
+import { FavsRepository } from '@shared/repositories/favs.repository';
+import { TrackRepository } from '@shared/repositories/track.repository';
 
 @Injectable()
 export class AlbumService {
-  constructor(private albumRepo: AlbumRepository) {}
+  constructor(
+    private albumRepo: AlbumRepository,
+    private favsRepo: FavsRepository,
+    private trackRepo: TrackRepository,
+  ) {}
 
-  create(createAlbumDto: CreateAlbumDto) {
-    return 'This action adds a new album';
+  create(dto: CreateAlbumDto) {
+    const { artistId, name, year } = dto;
+
+    const entity = new Album(name, year, artistId);
+
+    return this.albumRepo.create(entity);
   }
 
   findAll() {
-    return `This action returns all albums`;
+    return this.albumRepo.findAll();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} album`;
+  findOne(id: string) {
+    this.checkIfAlbumExists(id);
+
+    return this.albumRepo.findOne(id);
   }
 
-  update(id: number, updateAlbumDto: UpdateAlbumDto) {
-    return `This action updates a #${id} album`;
+  update(id: string, dto: UpdateAlbumDto) {
+    this.checkIfAlbumExists(id);
+
+    return this.albumRepo.update(id, dto);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} album`;
+  remove(id: string) {
+    this.checkIfAlbumExists(id);
+
+    this.favsRepo.removeAlbum(id);
+
+    this.trackRepo.removeAlbum(id);
+
+    return this.albumRepo.remove(id);
+  }
+
+  private checkIfAlbumExists(albumId: string) {
+    this.albumRepo.checkIfAlbumExists(albumId);
   }
 }

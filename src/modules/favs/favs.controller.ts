@@ -2,44 +2,48 @@ import {
   Controller,
   Get,
   Post,
-  Body,
   Param,
   Delete,
-  Put,
+  HttpStatus,
+  ParseUUIDPipe,
+  HttpCode,
 } from '@nestjs/common';
-import { CreateFavoriteDto } from './dto/create-favorite.dto';
-import { UpdateFavoriteDto } from './dto/update-favorite.dto';
-import { FavsService } from './favs.service';
+import { FavItemType, FavsService } from './favs.service';
+import { FavItemTypePipe } from '@shared/pipes/fav-item-type.pipe';
 
 @Controller('favs')
 export class FavsController {
   constructor(private readonly favsService: FavsService) {}
 
-  @Post()
-  create(@Body() createFavoriteDto: CreateFavoriteDto) {
-    return this.favsService.create(createFavoriteDto);
-  }
-
   @Get()
-  findAll() {
-    return this.favsService.findAll();
+  getFavs() {
+    return this.favsService.getFavs();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.favsService.findOne(+id);
-  }
-
-  @Put(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateFavoriteDto: UpdateFavoriteDto,
+  @Post(':itemType/:id')
+  add(
+    @Param(
+      'id',
+      new ParseUUIDPipe({ errorHttpStatusCode: HttpStatus.BAD_REQUEST }),
+    )
+    id: string,
+    @Param('itemType', new FavItemTypePipe())
+    itemType: FavItemType,
   ) {
-    return this.favsService.update(+id, updateFavoriteDto);
+    return this.favsService.addItem(id, itemType);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.favsService.remove(+id);
+  @Delete(':itemType/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  remove(
+    @Param(
+      'id',
+      new ParseUUIDPipe({ errorHttpStatusCode: HttpStatus.BAD_REQUEST }),
+    )
+    id: string,
+    @Param('itemType', new FavItemTypePipe())
+    itemType: FavItemType,
+  ) {
+    return this.favsService.removeItem(id, itemType);
   }
 }
