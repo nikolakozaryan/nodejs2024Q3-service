@@ -29,6 +29,12 @@ git checkout dev
 npm install
 ```
 
+## Create .env file
+
+```
+.env.example -> .env
+```
+
 ## Running application
 
 ```
