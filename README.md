@@ -29,6 +29,8 @@ git checkout dev
 npm install
 ```
 
+Note: If you have problems with this command, just run it with flag --legacy-peer-deps
+
 ## Create .env file
 
 ```
