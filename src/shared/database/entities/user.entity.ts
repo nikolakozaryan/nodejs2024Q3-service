@@ -1,25 +1,48 @@
 import { IUser } from '@core/interfaces';
 import { Exclude } from 'class-transformer';
-import { randomUUID } from 'crypto';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+  ValueTransformer,
+  VersionColumn,
+} from 'typeorm';
 
+const transformer: ValueTransformer = {
+  to: (val) => val,
+  from: (val: Date): number => val.getTime(),
+};
+
+@Entity('Users')
 export class User implements IUser {
-  id: string;
-  login: string;
-  version: number;
-  createdAt: number;
-  updatedAt: number;
-
-  @Exclude()
-  password: string;
-
   constructor(login: string, password: string) {
     Object.assign(this, {
-      id: randomUUID(),
       login: login,
       password: password,
-      version: 1,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
     });
   }
+
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column()
+  login: string;
+
+  @VersionColumn()
+  version: number;
+
+  @CreateDateColumn({
+    type: 'timestamp',
+    transformer,
+  })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamp', transformer })
+  updatedAt: Date;
+
+  @Exclude()
+  @Column()
+  password: string;
 }

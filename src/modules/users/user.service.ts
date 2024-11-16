@@ -16,20 +16,20 @@ export class UserService {
     return this.userRepo.create(entity);
   }
 
-  findAll() {
+  async findAll() {
     return this.userRepo.findAll();
   }
 
-  findOne(userId: string) {
-    this.checkIfUserExists(userId);
+  async findOne(userId: string) {
+    await this.checkIfUserExists(userId);
 
     return this.userRepo.findOne(userId);
   }
 
-  update(userId: string, dto: UpdatePasswordDto) {
-    this.checkIfUserExists(userId);
+  async update(userId: string, dto: UpdatePasswordDto) {
+    await this.checkIfUserExists(userId);
 
-    const user = this.findOne(userId);
+    const user = await this.findOne(userId);
 
     const { newPassword, oldPassword } = dto;
 
@@ -40,13 +40,13 @@ export class UserService {
     return this.userRepo.update(userId, newPassword);
   }
 
-  remove(userId: string) {
-    this.checkIfUserExists(userId);
+  async remove(userId: string) {
+    await this.checkIfUserExists(userId);
 
-    this.userRepo.remove(userId);
+    await this.userRepo.remove(userId);
   }
 
-  private checkIfUserExists(userId: string) {
-    this.userRepo.checkIfUserExists(userId);
+  private async checkIfUserExists(userId: string) {
+    await this.userRepo.checkIfUserExists(userId);
   }
 }
