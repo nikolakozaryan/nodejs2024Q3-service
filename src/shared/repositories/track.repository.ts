@@ -1,74 +1,62 @@
+import { CreateTrackDto } from '@modules/track/dto/create-track.dto';
 import { UpdateTrackDto } from '@modules/track/dto/update-track.dto';
 import {
   Injectable,
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Track } from '@shared/database/entities';
+import { Repository, In } from 'typeorm';
 
 @Injectable()
 export class TrackRepository {
-  private _tracks: Map<string, Track> = new Map();
+  constructor(
+    @InjectRepository(Track)
+    private repository: Repository<Track>,
+  ) {}
 
-  findOne(trackId: string): Track {
-    this.checkIfTrackExists(trackId);
-
-    return this._tracks.get(trackId);
+  async findOne(id: string): Promise<Track> {
+    return this.repository.findOneBy({ id });
   }
 
-  findAll(): Track[] {
-    return [...this._tracks.values()];
+  async findAll(): Promise<Track[]> {
+    return this.repository.find();
   }
 
-  findMany(ids: string[]): Track[] {
-    return ids.map((id) => this._tracks.get(id));
+  async findMany(ids: string[]): Promise<Track[]> {
+    return this.repository.findBy({ id: In(ids) });
   }
 
-  create(entity: Track): Track {
-    this._tracks.set(entity.id, entity);
+  async create(dto: CreateTrackDto): Promise<Track> {
+    const entity = await this.repository.create(dto);
 
-    return entity;
+    await this.repository.insert(entity);
+
+    return this.findOne(entity.id);
   }
 
-  update(trackId: string, dto: UpdateTrackDto): Track {
-    this.checkIfTrackExists(trackId);
+  async update(id: string, dto: UpdateTrackDto): Promise<Track> {
+    await this.repository.update(id, dto);
 
-    const track = this.findOne(trackId);
-
-    this._tracks.set(trackId, Object.assign(track, dto));
-
-    return this._tracks.get(trackId);
+    return this.findOne(id);
   }
 
-  remove(artistId: string): void {
-    this.checkIfTrackExists(artistId);
-
-    this._tracks.delete(artistId);
+  async remove(id: string): Promise<void> {
+    await this.repository.delete(id);
   }
 
-  removeArtist(artistId: string) {
-    this._tracks.forEach((value, key) => {
-      if (value.artistId === artistId) {
-        this._tracks.set(key, Object.assign(value, { artistId: null }));
-      }
+  async checkIfEntityExists(id: string, checkForFav = false): Promise<void> {
+    const isExists = await this.repository.exists({
+      where: { id },
     });
-  }
 
-  removeAlbum(albumId: string) {
-    this._tracks.forEach((value, key) => {
-      if (value.albumId === albumId) {
-        this._tracks.set(key, Object.assign(value, { albumId: null }));
-      }
-    });
-  }
-
-  checkIfTrackExists(trackId: string, checkForFav = false) {
-    if (!this._tracks.has(trackId)) {
-      const error = checkForFav
+    if (!isExists) {
+      const err = checkForFav
         ? new UnprocessableEntityException()
         : new NotFoundException();
 
-      throw error;
+      throw err;
     }
   }
 }

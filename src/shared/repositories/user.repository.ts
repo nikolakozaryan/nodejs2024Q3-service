@@ -1,46 +1,57 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { CreateUserDto } from '@modules/users/dto/create-user.dto';
+import {
+  Injectable,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '@shared/database/entities';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class UserRepository {
-  private _users: Map<string, User> = new Map();
+  constructor(
+    @InjectRepository(User)
+    private repository: Repository<User>,
+  ) {}
 
-  findOne(userId: string): User {
-    return this._users.get(userId);
+  async findOne(id: string): Promise<User> {
+    return this.repository.findOneBy({ id });
   }
 
-  findAll(): User[] {
-    return [...this._users.values()];
+  async findAll(): Promise<User[]> {
+    return this.repository.find();
   }
 
-  create(entity: User): User {
-    this._users.set(entity.id, entity);
+  async create(dto: CreateUserDto): Promise<User> {
+    const entity = await this.repository.create(dto);
 
-    return entity;
+    await this.repository.insert(entity);
+
+    return this.findOne(entity.id);
   }
 
-  update(userId: string, password: string): User {
-    const user = this.findOne(userId);
+  async update(id: string, password: string): Promise<User> {
+    await this.repository.update(id, { password });
 
-    this._users.set(
-      userId,
-      Object.assign(user, {
-        password,
-        version: user.version + 1,
-        updatedAt: Date.now(),
-      }),
-    );
-
-    return this._users.get(userId);
+    return this.findOne(id);
   }
 
-  remove(userId: string): void {
-    this._users.delete(userId);
+  async remove(id: string): Promise<void> {
+    await this.repository.delete(id);
   }
 
-  checkIfUserExists(userId: string) {
-    if (!this._users.has(userId)) {
-      throw new NotFoundException();
+  async checkIfEntityExists(id: string, checkForFav = false): Promise<void> {
+    const isExists = await this.repository.exists({
+      where: { id },
+    });
+
+    if (!isExists) {
+      const err = checkForFav
+        ? new UnprocessableEntityException()
+        : new NotFoundException();
+
+      throw err;
     }
   }
 }

@@ -1,61 +1,60 @@
+import { IFav } from '@core/interfaces';
+import { FavItemType } from '@core/types';
 import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Favorite } from '@shared/database/entities';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class FavsRepository {
-  private _artists: Set<string> = new Set();
-  private _albums: Set<string> = new Set();
-  private _tracks: Set<string> = new Set();
+  constructor(
+    @InjectRepository(Favorite)
+    private repository: Repository<Favorite>,
+  ) {}
 
-  getArtistIds(): string[] {
-    return Array.from(this._artists);
+  async findAll(): Promise<IFav> {
+    const rawData = await this.repository.find();
+
+    return rawData.reduce(
+      (acc: IFav, { album, artist, track }) => {
+        artist && acc.artists.push(artist);
+        album && acc.albums.push(album);
+        track && acc.tracks.push(track);
+
+        return acc;
+      },
+      { artists: [], albums: [], tracks: [] },
+    );
   }
 
-  getAlbumIds(): string[] {
-    return Array.from(this._albums);
+  async add(id: string, itemType: FavItemType) {
+    const entity = await this.repository.create({
+      ...(itemType === 'album' ? { albumId: id } : {}),
+      ...(itemType === 'artist' ? { artistId: id } : {}),
+      ...(itemType === 'track' ? { trackId: id } : {}),
+    });
+
+    await this.repository.insert(entity);
   }
 
-  getTrackIds(): string[] {
-    return Array.from(this._tracks);
+  async remove(id: string, itemType: FavItemType) {
+    await this.repository.delete({
+      ...(itemType === 'album' ? { albumId: id } : {}),
+      ...(itemType === 'artist' ? { artistId: id } : {}),
+      ...(itemType === 'track' ? { trackId: id } : {}),
+    });
   }
 
-  addArtist(id: string) {
-    this._artists.add(id);
-  }
+  async checkIsFav(id: string, itemType: FavItemType) {
+    const isExists = await this.repository.exists({
+      where: {
+        ...(itemType === 'album' ? { albumId: id } : {}),
+        ...(itemType === 'artist' ? { artistId: id } : {}),
+        ...(itemType === 'track' ? { trackId: id } : {}),
+      },
+    });
 
-  addAlbum(id: string) {
-    this._albums.add(id);
-  }
-
-  addTrack(id: string) {
-    this._tracks.add(id);
-  }
-
-  removeArtist(id: string) {
-    this._artists.delete(id);
-  }
-
-  removeAlbum(id: string) {
-    this._albums.delete(id);
-  }
-
-  removeTrack(id: string) {
-    this._tracks.delete(id);
-  }
-
-  checkIfTrackIsFav(trackId: string) {
-    if (!this._tracks.has(trackId)) {
-      throw new UnprocessableEntityException();
-    }
-  }
-
-  checkIfAlbumIsFav(albumId: string) {
-    if (!this._albums.has(albumId)) {
-      throw new UnprocessableEntityException();
-    }
-  }
-
-  checkIfArtistIsFav(artistId: string) {
-    if (!this._artists.has(artistId)) {
+    if (!isExists) {
       throw new UnprocessableEntityException();
     }
   }
