@@ -10,4 +10,6 @@ RUN npm i --legacy-peer-deps
 
 COPY . .
 
+COPY .env.docker .env
+
 CMD ["npm", "run", "start:dev"]
