@@ -14,46 +14,29 @@ export class FavsService {
     private artistRepo: ArtistRepository,
   ) {}
 
-  getFavs() {
-    return {
-      artists: this.artistRepo.findMany(this.favsRepo.getArtistIds()),
-      albums: this.albumRepo.findMany(this.favsRepo.getAlbumIds()),
-      tracks: this.trackRepo.findMany(this.favsRepo.getTrackIds()),
-    };
+  async getFavs() {
+    return this.favsRepo.findAll();
   }
 
-  addItem(id: string, itemType: FavItemType) {
+  async addItem(id: string, itemType: FavItemType) {
     switch (itemType) {
       case 'album':
-        this.albumRepo.checkIfAlbumExists(id, true);
-
-        this.favsRepo.addAlbum(id);
+        await this.albumRepo.checkIfEntityExists(id, true);
         break;
       case 'artist':
-        this.artistRepo.checkIfArtistExists(id, true);
-        this.favsRepo.addArtist(id);
+        await this.artistRepo.checkIfEntityExists(id, true);
         break;
       case 'track':
-        this.trackRepo.checkIfTrackExists(id, true);
-        this.favsRepo.addTrack(id);
+        await this.trackRepo.checkIfEntityExists(id, true);
         break;
     }
+
+    await this.favsRepo.add(id, itemType);
   }
 
-  removeItem(id: string, itemType: FavItemType) {
-    switch (itemType) {
-      case 'album':
-        this.favsRepo.checkIfAlbumIsFav(id);
-        this.favsRepo.removeAlbum(id);
-        break;
-      case 'artist':
-        this.favsRepo.checkIfArtistIsFav(id);
-        this.favsRepo.removeArtist(id);
-        break;
-      case 'track':
-        this.favsRepo.checkIfTrackIsFav(id);
-        this.favsRepo.removeTrack(id);
-        break;
-    }
+  async removeItem(id: string, itemType: FavItemType) {
+    await this.favsRepo.checkIsFav(id, itemType);
+
+    await this.favsRepo.remove(id, itemType);
   }
 }

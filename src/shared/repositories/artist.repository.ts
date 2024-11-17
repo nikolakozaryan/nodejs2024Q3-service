@@ -1,58 +1,62 @@
+import { CreateArtistDto } from '@modules/artist/dto/create-artist.dto';
 import { UpdateArtistDto } from '@modules/artist/dto/update-artist.dto';
 import {
   Injectable,
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Artist } from '@shared/database/entities';
+import { In, Repository } from 'typeorm';
 
 @Injectable()
 export class ArtistRepository {
-  private _artists: Map<string, Artist> = new Map();
+  constructor(
+    @InjectRepository(Artist)
+    private repository: Repository<Artist>,
+  ) {}
 
-  findOne(artistId: string): Artist {
-    this.checkIfArtistExists(artistId);
-
-    return this._artists.get(artistId);
+  async findOne(id: string): Promise<Artist> {
+    return this.repository.findOneBy({ id });
   }
 
-  findAll(): Artist[] {
-    return [...this._artists.values()];
+  async findAll(): Promise<Artist[]> {
+    return this.repository.find();
   }
 
-  findMany(ids: string[]): Artist[] {
-    return ids.map((id) => this._artists.get(id));
+  async findMany(ids: string[]): Promise<Artist[]> {
+    return this.repository.findBy({ id: In(ids) });
   }
 
-  create(entity: Artist): Artist {
-    this._artists.set(entity.id, entity);
+  async create(dto: CreateArtistDto): Promise<Artist> {
+    const entity = await this.repository.create(dto);
 
-    return entity;
+    await this.repository.insert(entity);
+
+    return this.findOne(entity.id);
   }
 
-  update(artistId: string, dto: UpdateArtistDto): Artist {
-    this.checkIfArtistExists(artistId);
+  async update(id: string, dto: UpdateArtistDto): Promise<Artist> {
+    await this.repository.update(id, dto);
 
-    const artist = this.findOne(artistId);
-
-    this._artists.set(artistId, Object.assign(artist, dto));
-
-    return this._artists.get(artistId);
+    return this.findOne(id);
   }
 
-  remove(artistId: string): void {
-    this.checkIfArtistExists(artistId);
-
-    this._artists.delete(artistId);
+  async remove(id: string): Promise<void> {
+    await this.repository.delete(id);
   }
 
-  checkIfArtistExists(artistId: string, checkForFav = false) {
-    if (!this._artists.has(artistId)) {
-      const error = checkForFav
+  async checkIfEntityExists(id: string, checkForFav = false): Promise<void> {
+    const isExists = await this.repository.exists({
+      where: { id },
+    });
+
+    if (!isExists) {
+      const err = checkForFav
         ? new UnprocessableEntityException()
         : new NotFoundException();
 
-      throw error;
+      throw err;
     }
   }
 }

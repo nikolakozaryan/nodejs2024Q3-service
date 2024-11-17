@@ -2,18 +2,13 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UserRepository } from '@shared/repositories/user.repository';
-import { User } from '@shared/database/entities';
 
 @Injectable()
 export class UserService {
   constructor(private userRepo: UserRepository) {}
 
   create(dto: CreateUserDto) {
-    const { login, password } = dto;
-
-    const entity = new User(login, password);
-
-    return this.userRepo.create(entity);
+    return this.userRepo.create(dto);
   }
 
   async findAll() {
@@ -21,13 +16,13 @@ export class UserService {
   }
 
   async findOne(userId: string) {
-    await this.checkIfUserExists(userId);
+    await this.checkIfEntityExists(userId);
 
     return this.userRepo.findOne(userId);
   }
 
   async update(userId: string, dto: UpdatePasswordDto) {
-    await this.checkIfUserExists(userId);
+    await this.checkIfEntityExists(userId);
 
     const user = await this.findOne(userId);
 
@@ -41,12 +36,12 @@ export class UserService {
   }
 
   async remove(userId: string) {
-    await this.checkIfUserExists(userId);
+    await this.checkIfEntityExists(userId);
 
     await this.userRepo.remove(userId);
   }
 
-  private async checkIfUserExists(userId: string) {
-    await this.userRepo.checkIfUserExists(userId);
+  private async checkIfEntityExists(userId: string) {
+    await this.userRepo.checkIfEntityExists(userId);
   }
 }
