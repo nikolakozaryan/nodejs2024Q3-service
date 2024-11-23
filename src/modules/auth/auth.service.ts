@@ -1,10 +1,14 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UserService } from '@modules/users/user.service';
 import { CreateUserDto } from '@modules/users/dto/create-user.dto';
-import { RefreshTokenDto } from '@modules/auth/dto/refresh-token.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { IJwtPayload } from '@core/interfaces/jwt-payload.interface';
+import { IRefreshTokenPayload } from '@core/interfaces';
 
 @Injectable()
 export class AuthService {
@@ -40,7 +44,29 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  async refresh(dto: RefreshTokenDto) {}
+  async refresh(dto: IRefreshTokenPayload) {
+    if (!dto.refreshToken) {
+      throw new UnauthorizedException();
+    }
+
+    try {
+      const payload = await this.jwtService.verifyAsync(dto.refreshToken, {
+        secret: process.env.JWT_SECRET_REFRESH_KEY,
+        ignoreExpiration: false,
+      });
+
+      const { userId, login } = payload;
+
+      const [accessToken, refreshToken] = await Promise.all([
+        this.createAccessToken({ userId, login }),
+        this.createRefreshToken({ userId, login }),
+      ]);
+
+      return { accessToken, refreshToken };
+    } catch {
+      throw new ForbiddenException();
+    }
+  }
 
   async createAccessToken(payload: IJwtPayload) {
     return this.jwtService.signAsync(payload, {

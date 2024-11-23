@@ -7,7 +7,8 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { UserService } from '@modules/users/user.service';
-import { IJwtPayload } from '@core/interfaces/jwt-payload.interface';
+import { IJwtPayload } from '@core/interfaces';
+import { User } from '@shared/database/entities';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -19,7 +20,13 @@ export class AuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
 
-    const excludedRoutes = ['/auth/signup', '/auth/login', '/doc', '/'];
+    const excludedRoutes = [
+      '/auth/signup',
+      '/auth/login',
+      '/auth/refresh',
+      '/doc',
+      '/',
+    ];
 
     if (excludedRoutes.includes(request.route.path)) {
       return true;
@@ -39,9 +46,7 @@ export class AuthGuard implements CanActivate {
 
       const user = await this.userService.findOne({ id: payload.userId });
 
-      if (!user) {
-        throw new Error('User not found');
-      }
+      this.checkUser(user);
     } catch {
       throw new UnauthorizedException();
     }
@@ -52,5 +57,9 @@ export class AuthGuard implements CanActivate {
   private extractTokenFromHeader(request: Request): string | undefined {
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
     return type === 'Bearer' ? token : undefined;
+  }
+
+  private checkUser(user: User) {
+    if (!user) throw new Error('User not found');
   }
 }
