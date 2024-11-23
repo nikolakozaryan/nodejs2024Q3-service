@@ -2,6 +2,9 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UserRepository } from '@shared/repositories/user.repository';
+import { User } from '@shared/database/entities';
+import { FindManyOptions, FindOptionsWhere } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -15,20 +18,22 @@ export class UserService {
     return this.userRepo.findAll();
   }
 
-  async findOne(userId: string) {
-    await this.checkIfEntityExists(userId);
+  async findOne(where: FindOptionsWhere<User>) {
+    await this.checkIfEntityExists({ where });
 
-    return this.userRepo.findOne(userId);
+    return this.userRepo.findOne(where);
   }
 
   async update(userId: string, dto: UpdatePasswordDto) {
-    await this.checkIfEntityExists(userId);
+    await this.checkIfEntityExists({ where: { id: userId } });
 
-    const user = await this.findOne(userId);
+    const user = await this.findOne({ id: userId });
 
     const { newPassword, oldPassword } = dto;
 
-    if (user.password !== oldPassword) {
+    const isPasswordMatch = await bcrypt.compare(oldPassword, user.password);
+
+    if (!isPasswordMatch) {
       throw new ForbiddenException('Old password is not correct');
     }
 
@@ -36,12 +41,12 @@ export class UserService {
   }
 
   async remove(userId: string) {
-    await this.checkIfEntityExists(userId);
+    await this.checkIfEntityExists({ where: { id: userId } });
 
     await this.userRepo.remove(userId);
   }
 
-  private async checkIfEntityExists(userId: string) {
-    await this.userRepo.checkIfEntityExists(userId);
+  private async checkIfEntityExists(options: FindManyOptions<User>) {
+    await this.userRepo.checkIfEntityExists(options);
   }
 }
