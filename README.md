@@ -51,10 +51,10 @@ For more information about OpenAPI/Swagger please visit https://swagger.io/.
 
 Download Docker Desktop [HERE](https://www.docker.com/) and install it.
 
-Change brunch to dev-docker
+Change brunch to dev-final
 
 ```
-git checkout dev-docker
+git checkout dev-final
 ```
 
 To run the app with docker:
@@ -108,6 +108,12 @@ To run only specific test suite with authorization
 
 ```
 npm run test:auth -- <path to suite>
+```
+
+To run tests for refresh token
+
+```
+npm run test:refresh
 ```
 
 ### Auto-fix and format
