@@ -17,9 +17,9 @@ export class FavsRepository {
 
     return rawData.reduce(
       (acc: IFav, { album, artist, track }) => {
-        artist && acc.artists.push(artist);
-        album && acc.albums.push(album);
-        track && acc.tracks.push(track);
+        if (artist) acc.artists.push(artist);
+        if (album) acc.albums.push(album);
+        if (track) acc.tracks.push(track);
 
         return acc;
       },
@@ -28,7 +28,7 @@ export class FavsRepository {
   }
 
   async add(id: string, itemType: FavItemType) {
-    const entity = await this.repository.create({
+    const entity = this.repository.create({
       ...(itemType === 'album' ? { albumId: id } : {}),
       ...(itemType === 'artist' ? { artistId: id } : {}),
       ...(itemType === 'track' ? { trackId: id } : {}),

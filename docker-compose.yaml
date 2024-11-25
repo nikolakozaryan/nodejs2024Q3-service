@@ -2,7 +2,7 @@ services:
   api:
     expose:
       - ${PORT}
-    image: nikolakozaryan/nodejs2024q3-service-api
+    image: nikolakozaryan/nodejs2024q3-service-api:auth
     restart: on-failure
     networks:
       - service-network

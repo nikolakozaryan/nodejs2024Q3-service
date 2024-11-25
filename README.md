@@ -29,6 +29,14 @@ git checkout dev
 npm install
 ```
 
+Note: If you have problems with this command, just run it with flag --legacy-peer-deps
+
+## Create .env file
+
+```
+.env.example -> .env
+```
+
 ## Running application
 
 ```
@@ -38,6 +46,41 @@ npm start
 After starting the app on port (4000 as default) you can open
 in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
 For more information about OpenAPI/Swagger please visit https://swagger.io/.
+
+## Running application with Docker
+
+Download Docker Desktop [HERE](https://www.docker.com/) and install it.
+
+Change brunch to dev-final
+
+```
+git checkout dev-final
+```
+
+To run the app with docker:
+
+```
+npm run compose
+```
+
+or in detached mode:
+
+```
+npm run compose-detached
+```
+
+To scan images for security vulnerabilities:
+
+```
+npm run scan
+```
+
+Images on [DockerHub](https://hub.docker.com/):
+
+1. [Service](https://hub.docker.com/repository/docker/nikolakozaryan/nodejs2024q3-service-api/general)
+2. [Database](https://hub.docker.com/repository/docker/nikolakozaryan/nodejs2024q3-service-postgres/general)
+
+**_Nice to know_: in case you use Windows, please activate Hyper-V feature in Windows settings and disable "Use the WSL 2 based engine" option in Docker Desktop settings.**
 
 ## Testing
 
@@ -65,6 +108,12 @@ To run only specific test suite with authorization
 
 ```
 npm run test:auth -- <path to suite>
+```
+
+To run tests for refresh token
+
+```
+npm run test:refresh
 ```
 
 ### Auto-fix and format

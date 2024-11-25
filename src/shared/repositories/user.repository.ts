@@ -6,7 +6,8 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '@shared/database/entities';
-import { Repository } from 'typeorm';
+import { FindManyOptions, FindOptionsWhere, Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserRepository {
@@ -15,8 +16,8 @@ export class UserRepository {
     private repository: Repository<User>,
   ) {}
 
-  async findOne(id: string): Promise<User> {
-    return this.repository.findOneBy({ id });
+  async findOne(where: FindOptionsWhere<User>): Promise<User> {
+    return this.repository.findOneBy(where);
   }
 
   async findAll(): Promise<User[]> {
@@ -24,34 +25,35 @@ export class UserRepository {
   }
 
   async create(dto: CreateUserDto): Promise<User> {
-    const entity = await this.repository.create(dto);
+    const password = await bcrypt.hash(dto.password, +process.env.CRYPT_SALT);
+
+    const entity = this.repository.create({ ...dto, password });
 
     await this.repository.insert(entity);
 
-    return this.findOne(entity.id);
+    return this.findOne({ id: entity.id });
   }
 
   async update(id: string, password: string): Promise<User> {
     await this.repository.update(id, { password });
 
-    return this.findOne(id);
+    return this.findOne({ id });
   }
 
   async remove(id: string): Promise<void> {
     await this.repository.delete(id);
   }
 
-  async checkIfEntityExists(id: string, checkForFav = false): Promise<void> {
-    const isExists = await this.repository.exists({
-      where: { id },
-    });
+  async checkIfEntityExists(
+    options: FindManyOptions<User>,
+    checkForFav = false,
+  ): Promise<void> {
+    const isExists = await this.repository.exists(options);
 
     if (!isExists) {
-      const err = checkForFav
+      throw checkForFav
         ? new UnprocessableEntityException()
         : new NotFoundException();
-
-      throw err;
     }
   }
 }
